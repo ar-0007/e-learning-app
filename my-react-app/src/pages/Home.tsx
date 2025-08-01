@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -28,34 +28,140 @@ const WhatsAppIcon = () => (
   </svg>
 )
 
+const StarIcon = ({ className }: { className?: string }) => (
+  <svg className={className || "w-5 h-5"} fill="currentColor" viewBox="0 0 20 20">
+    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+  </svg>
+)
+
+const PlayIcon = () => (
+  <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+  </svg>
+)
+
 const Home: React.FC = () => {
+  const [activeFilter, setActiveFilter] = useState('all');
+
   const handleWhatsAppContact = () => {
     window.open('https://wa.me/1234567890?text=Hi! I\'m interested in your car detailing courses.', '_blank')
   }
 
   const handleEnrollNow = () => {
-    // Scroll to courses section
     document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  const testimonials = [
+    {
+      name: "Sim Sidhu",
+      role: "Graduate Student",
+      content: "The customer service this academy provides is outstanding! And the results are stunning. Unbelievable how they will make you understand car detailing so thoroughly!",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+      name: "Sirjan Randhawa",
+      role: "Professional Detailer",
+      content: "Outstanding training by the team! They went above and beyond with the course content, and the mentorship program turned out flawless. Highly recommend to anyone looking for high-quality car detailing education!",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+      name: "Gursimran Sandhu",
+      role: "Car Enthusiast",
+      content: "Best ever education I got. As a car lover, I needed to understand every detail about car care, and the team made it happen. Everything was perfect - both theory and practical sessions.",
+      rating: 5,
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+    }
+  ];
+
+  const courses = [
+    {
+      id: 1,
+      name: "Basic Detailing Fundamentals",
+      description: "Learn the essential techniques of car detailing including washing, waxing, and basic interior cleaning.",
+      price: "$299",
+      duration: "4 weeks",
+      level: "beginner",
+      image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop",
+      features: ["Hands-on training", "Certificate included", "Lifetime access"]
+    },
+    {
+      id: 2,
+      name: "Advanced Paint Correction",
+      description: "Master paint correction techniques, swirl removal, and achieving showroom-quality finishes.",
+      price: "$499",
+      duration: "6 weeks",
+      level: "intermediate",
+      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop",
+      features: ["Expert mentorship", "Advanced techniques", "Business guidance"]
+    },
+    {
+      id: 3,
+      name: "Ceramic Coating Mastery",
+      description: "Learn professional ceramic coating application and advanced protection techniques.",
+      price: "$399",
+      duration: "5 weeks",
+      level: "intermediate",
+      image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop",
+      features: ["Professional tools", "Industry certification", "Mentorship included"]
+    },
+    {
+      id: 4,
+      name: "Business & Marketing",
+      description: "Learn how to start and grow your own detailing business with proven marketing strategies.",
+      price: "$199",
+      duration: "3 weeks",
+      level: "all",
+      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
+      features: ["Business plan", "Marketing strategies", "Client management"]
+    }
+  ];
+
+  const filteredCourses = activeFilter === 'all' 
+    ? courses 
+    : courses.filter(course => course.level === activeFilter);
 
   return (
     <div className="min-h-screen bg-white">
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-gray-50 to-white section-padding">
-        <div className="container-custom">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold text-luxury-black mb-6 leading-tight">
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="relative container-custom section-padding">
+          <div className="text-center max-w-5xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               Become a Certified
               <span className="text-luxury-orange block">Car Detailer</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-              Learn from experts. Get certified. Build your detailing career.
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-3xl mx-auto">
+              Learn from industry experts. Get certified. Build your detailing career. 
+              Join 500+ successful graduates who transformed their passion into profession.
             </p>
-            <button onClick={handleEnrollNow} className="btn-primary text-lg px-8 py-4">
-              Enroll Now
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+              <button onClick={handleEnrollNow} className="btn-primary text-lg px-8 py-4 bg-luxury-orange hover:bg-orange-600">
+                Enroll Now - Start Today
+              </button>
+              <button className="btn-secondary text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-luxury-black">
+                <PlayIcon />
+                Watch Course Preview
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-luxury-orange">500+</div>
+                <div className="text-gray-300">Graduates</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-luxury-orange">95%</div>
+                <div className="text-gray-300">Success Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-luxury-orange">4.9★</div>
+                <div className="text-gray-300">Student Rating</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -64,12 +170,11 @@ const Home: React.FC = () => {
       <section id="about" className="section-padding bg-white">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-luxury-black mb-8">About Our Training Academy</h2>
+            <h2 className="text-4xl font-bold text-luxury-black mb-8">About LAS Detailers University</h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              At Luxury Auto Spa – Detailers University, we believe in hands-on learning with expert guidance. 
-              Our comprehensive training program combines one-on-one mentorship with practical, real-world experience. 
-              Every student receives personalized attention from industry professionals, ensuring you master the art 
-              of car detailing from basic techniques to advanced methods.
+              At LAS Detailers University, we don't just teach car detailing — we celebrate it. Our story began when we were just kids, 
+              spending weekends meticulously washing and detailing our parents' vehicles. There was something magical about seeing a car 
+              sparkle after hours of care, and it's that same magic that drives our training programs today.
             </p>
             <div className="grid md:grid-cols-3 gap-8 mt-12">
               <div className="text-center">
@@ -77,71 +182,123 @@ const Home: React.FC = () => {
                   <MentorIcon />
                 </div>
                 <h3 className="text-xl font-semibold text-luxury-black mb-2">One-on-One Mentorship</h3>
-                <p className="text-gray-600">Personal guidance from industry experts</p>
+                <p className="text-gray-600">Personal guidance from industry experts with 10+ years experience</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-luxury-orange rounded-full flex items-center justify-center mx-auto mb-4">
                   <CarIcon />
                 </div>
                 <h3 className="text-xl font-semibold text-luxury-black mb-2">Hands-On Training</h3>
-                <p className="text-gray-600">Real-world experience with actual vehicles</p>
+                <p className="text-gray-600">Real-world experience with actual vehicles and professional tools</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-luxury-orange rounded-full flex items-center justify-center mx-auto mb-4">
                   <CertificateIcon />
                 </div>
-                <h3 className="text-xl font-semibold text-luxury-black mb-2">Certificate of Completion</h3>
-                <p className="text-gray-600">Industry-recognized certification</p>
+                <h3 className="text-xl font-semibold text-luxury-black mb-2">Industry Certification</h3>
+                <p className="text-gray-600">Recognized certification that opens doors to professional opportunities</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="section-padding bg-gray-50">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-luxury-black mb-4">Trusted by 500+ Students</h2>
+            <p className="text-lg text-gray-600">See what our graduates say about their experience</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg p-8">
+                <div className="flex items-center mb-4">
+                  <img 
+                    src={testimonial.image} 
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full object-cover mr-4"
+                  />
+                  <div>
+                    <h4 className="font-semibold text-luxury-black">{testimonial.name}</h4>
+                    <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                  </div>
+                </div>
+                <div className="flex mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <StarIcon key={i} className="text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-gray-700 italic">"{testimonial.content}"</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Courses Section */}
-      <section id="courses" className="section-padding bg-gray-50">
+      <section id="courses" className="section-padding bg-white">
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-luxury-black mb-4">Our Courses</h2>
-            <p className="text-lg text-gray-600">Master the art of car detailing with our comprehensive courses</p>
+            <p className="text-lg text-gray-600 mb-8">Master the art of car detailing with our comprehensive courses</p>
+            
+            {/* Filter Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              {['all', 'beginner', 'intermediate', 'advanced'].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-6 py-2 rounded-full font-medium transition-all ${
+                    activeFilter === filter
+                      ? 'bg-luxury-orange text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-luxury-orange rounded-lg flex items-center justify-center mb-6">
-                <CarIcon />
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {filteredCourses.map((course) => (
+              <div key={course.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="h-48 bg-gray-200 relative">
+                  <img 
+                    src={course.image} 
+                    alt={course.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {course.level}
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-luxury-black mb-2">{course.name}</h3>
+                  <p className="text-gray-600 mb-4">{course.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-bold text-luxury-orange">{course.price}</span>
+                    <span className="text-gray-500">{course.duration}</span>
+                  </div>
+                  <ul className="mb-6">
+                    {course.features.map((feature, index) => (
+                      <li key={index} className="text-sm text-gray-600 mb-1 flex items-center">
+                        <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <button className="btn-primary w-full">Enroll Now</button>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-luxury-black mb-4">Basic Detailing Fundamentals</h3>
-              <p className="text-gray-600 mb-6">
-                Learn the essential techniques of car detailing including washing, waxing, and basic interior cleaning.
-              </p>
-              <button className="btn-secondary w-full">Learn More</button>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-luxury-orange rounded-lg flex items-center justify-center mb-6">
-                <CertificateIcon />
-              </div>
-              <h3 className="text-2xl font-bold text-luxury-black mb-4">Advanced Paint Correction</h3>
-              <p className="text-gray-600 mb-6">
-                Master paint correction techniques, swirl removal, and achieving showroom-quality finishes.
-              </p>
-              <button className="btn-secondary w-full">Learn More</button>
-            </div>
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-luxury-orange rounded-lg flex items-center justify-center mb-6">
-                <MentorIcon />
-              </div>
-              <h3 className="text-2xl font-bold text-luxury-black mb-4">Business & Marketing</h3>
-              <p className="text-gray-600 mb-6">
-                Learn how to start and grow your own detailing business with proven marketing strategies.
-              </p>
-              <button className="btn-secondary w-full">Learn More</button>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="section-padding bg-white">
+      <section id="how-it-works" className="section-padding bg-gray-50">
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-luxury-black mb-4">How It Works</h2>
@@ -153,20 +310,20 @@ const Home: React.FC = () => {
                 1
               </div>
               <h3 className="text-xl font-semibold text-luxury-black mb-2">Sign Up</h3>
-              <p className="text-gray-600">Register for your chosen course and create your account</p>
+              <p className="text-gray-600">Register for your chosen course and create your student account</p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-luxury-orange rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white">
                 2
               </div>
-              <h3 className="text-xl font-semibold text-luxury-black mb-2">Get Approved</h3>
-              <p className="text-gray-600">Our team reviews your application and confirms enrollment</p>
+              <h3 className="text-xl font-semibold text-luxury-black mb-2">Get Access</h3>
+              <p className="text-gray-600">Receive your login credentials and access to course materials</p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-luxury-orange rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white">
                 3
               </div>
-              <h3 className="text-xl font-semibold text-luxury-black mb-2">Learn</h3>
+              <h3 className="text-xl font-semibold text-luxury-black mb-2">Learn & Practice</h3>
               <p className="text-gray-600">Access comprehensive training materials and hands-on sessions</p>
             </div>
             <div className="text-center">
@@ -174,46 +331,60 @@ const Home: React.FC = () => {
                 4
               </div>
               <h3 className="text-xl font-semibold text-luxury-black mb-2">Get Certified</h3>
-              <p className="text-gray-600">Complete your training and receive your certification</p>
+              <p className="text-gray-600">Complete your training and receive your industry certification</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Mentorship Section */}
-      <section id="mentorship" className="section-padding bg-gray-50">
+      <section id="mentorship" className="section-padding bg-white">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-luxury-black mb-8">One-on-One Mentorship</h2>
+            <h2 className="text-4xl font-bold text-luxury-black mb-8">One-on-One Mentorship Program</h2>
             <p className="text-lg text-gray-600 mb-8">
               Get personalized guidance from industry experts through our exclusive mentorship program. 
               Schedule sessions via Zoom and choose from flexible payment options.
             </p>
-            <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
-              <h3 className="text-2xl font-bold text-luxury-black mb-4">Book Your Session</h3>
-              <p className="text-gray-600 mb-6">
+            <div className="bg-gradient-to-r from-luxury-orange to-orange-600 rounded-xl shadow-lg p-8 max-w-2xl mx-auto text-white">
+              <h3 className="text-2xl font-bold mb-4">Book Your Session</h3>
+              <p className="mb-6">
                 Connect with experienced detailers for personalized training and career guidance.
+                Sessions available via Zoom with flexible scheduling.
               </p>
-              <button className="btn-primary">Book Mentorship Session</button>
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">$99</div>
+                  <div className="text-sm">per session</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">60 min</div>
+                  <div className="text-sm">session duration</div>
+                </div>
+              </div>
+              <button className="bg-white text-luxury-orange font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transition-all">
+                Book Mentorship Session
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="section-padding bg-white">
+      <section id="contact" className="section-padding bg-gray-50">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-luxury-black mb-8">Contact Our Marketing Team</h2>
+            <h2 className="text-4xl font-bold text-luxury-black mb-8">Ready to Start Your Journey?</h2>
             <p className="text-lg text-gray-600 mb-8">
-              Have questions? Our marketing team is here to help you get started on your detailing journey.
+              Have questions? Our team is here to help you get started on your detailing career.
+              Contact us via WhatsApp for instant support.
             </p>
             <button 
               onClick={handleWhatsAppContact}
-              className="btn-primary flex items-center justify-center space-x-2 mx-auto"
+              className="btn-primary flex items-center justify-center space-x-2 mx-auto text-lg px-8 py-4"
             >
               <WhatsAppIcon />
-              <span>Contact Us</span>
+              <span>Contact Us on WhatsApp</span>
             </button>
           </div>
         </div>
