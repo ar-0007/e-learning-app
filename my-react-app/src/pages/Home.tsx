@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import courseService, { type Course } from '../services/courseService';
 
 // Icons
 const CarIcon = () => (
@@ -42,6 +43,29 @@ const PlayIcon = () => (
 
 const Home: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 6;
+
+  // Fetch courses from backend
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const allCourses = await courseService.getAllCourses();
+        setCourses(allCourses);
+      } catch (err) {
+        setError('Failed to load courses. Please try again later.');
+        console.error('Error fetching courses:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   const handleWhatsAppContact = () => {
     window.open('https://wa.me/1234567890?text=Hi! I\'m interested in your car detailing courses.', '_blank')
@@ -49,6 +73,11 @@ const Home: React.FC = () => {
 
   const handleEnrollNow = () => {
     document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleEnroll = (courseId: string) => {
+    console.log(`Enrolling in course ${courseId}`);
+    // TODO: Implement enrollment functionality
   }
 
   const testimonials = [
@@ -75,52 +104,29 @@ const Home: React.FC = () => {
     }
   ];
 
-  const courses = [
-    {
-      id: 1,
-      name: "Basic Detailing Fundamentals",
-      description: "Learn the essential techniques of car detailing including washing, waxing, and basic interior cleaning.",
-      price: "$299",
-      duration: "4 weeks",
-      level: "beginner",
-      image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop",
-      features: ["Hands-on training", "Certificate included", "Lifetime access"]
-    },
-    {
-      id: 2,
-      name: "Advanced Paint Correction",
-      description: "Master paint correction techniques, swirl removal, and achieving showroom-quality finishes.",
-      price: "$499",
-      duration: "6 weeks",
-      level: "intermediate",
-      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop",
-      features: ["Expert mentorship", "Advanced techniques", "Business guidance"]
-    },
-    {
-      id: 3,
-      name: "Ceramic Coating Mastery",
-      description: "Learn professional ceramic coating application and advanced protection techniques.",
-      price: "$399",
-      duration: "5 weeks",
-      level: "intermediate",
-      image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop",
-      features: ["Professional tools", "Industry certification", "Mentorship included"]
-    },
-    {
-      id: 4,
-      name: "Business & Marketing",
-      description: "Learn how to start and grow your own detailing business with proven marketing strategies.",
-      price: "$199",
-      duration: "3 weeks",
-      level: "all",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
-      features: ["Business plan", "Marketing strategies", "Client management"]
-    }
-  ];
+  // Get one course from each level (newest first) for Newest Courses section
+  const beginnerCourses = courses.filter(course => course.level === 'BEGINNER');
+  const intermediateCourses = courses.filter(course => course.level === 'INTERMEDIATE');
+  const advancedCourses = courses.filter(course => course.level === 'ADVANCED');
 
-  const filteredCourses = activeFilter === 'all' 
+  // Get the newest course from each level
+  const beginnerCourse = beginnerCourses.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+  const intermediateCourse = intermediateCourses.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+  const advancedCourse = advancedCourses.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+
+  // Create array of newest courses (exactly one from each level)
+  const newestCourses = [beginnerCourse, intermediateCourse, advancedCourse].filter(Boolean) as Course[];
+
+  // Filter all courses based on active filter for the All Courses section
+  const filteredAllCourses = activeFilter === 'all' 
     ? courses 
-    : courses.filter(course => course.level === activeFilter);
+    : courses.filter(course => course.level.toLowerCase() === activeFilter);
+
+  // Pagination for all courses
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+  const currentCourses = filteredAllCourses.slice(indexOfFirstCourse, indexOfLastCourse);
+  const totalPages = Math.ceil(filteredAllCourses.length / coursesPerPage);
 
   return (
     <div className="min-h-screen bg-white">
@@ -236,66 +242,223 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Courses Section */}
-      <section id="courses" className="section-padding bg-white">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-luxury-black mb-4">Our Courses</h2>
-            <p className="text-lg text-gray-600 mb-8">Master the art of car detailing with our comprehensive courses</p>
-            
-            {/* Filter Buttons */}
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
-              {['all', 'beginner', 'intermediate', 'advanced'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`px-6 py-2 rounded-full font-medium transition-all ${
-                    activeFilter === filter
-                      ? 'bg-luxury-orange text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredCourses.map((course) => (
-              <div key={course.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="h-48 bg-gray-200 relative">
-                  <img 
-                    src={course.image} 
-                    alt={course.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {course.level}
-                  </div>
+             {/* Courses Section */}
+       <section id="courses" className="section-padding bg-white">
+         <div className="container-custom">
+           
+                       {/* All Courses Section */}
+            <div>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-luxury-black mb-4">
+                  {activeFilter === 'all' ? 'All Courses' : 
+                   activeFilter === 'beginner' ? 'Beginner Courses' :
+                   activeFilter === 'intermediate' ? 'Intermediate Courses' :
+                   'Advanced Courses'}
+                </h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  {activeFilter === 'all' ? 'Master the art of car detailing with our comprehensive courses' :
+                   activeFilter === 'beginner' ? 'Perfect for those just starting their detailing journey' :
+                   activeFilter === 'intermediate' ? 'Take your skills to the next level with advanced techniques' :
+                   'Professional-level training for experienced detailers'}
+                </p>
+               
+                               {/* Filter Buttons */}
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                  {[
+                    { value: 'all', label: 'All Courses' },
+                    { value: 'beginner', label: 'Beginner Courses' },
+                    { value: 'intermediate', label: 'Intermediate Courses' },
+                    { value: 'advanced', label: 'Advanced Courses' }
+                  ].map((filter) => (
+                    <button
+                      key={filter.value}
+                      onClick={() => {
+                        setActiveFilter(filter.value);
+                        setCurrentPage(1); // Reset to first page when filter changes
+                      }}
+                      className={`px-6 py-2 rounded-full font-medium transition-all ${
+                        activeFilter === filter.value
+                          ? 'bg-luxury-orange text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-luxury-black mb-2">{course.name}</h3>
-                  <p className="text-gray-600 mb-4">{course.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-luxury-orange">{course.price}</span>
-                    <span className="text-gray-500">{course.duration}</span>
-                  </div>
-                  <ul className="mb-6">
-                    {course.features.map((feature, index) => (
-                      <li key={index} className="text-sm text-gray-600 mb-1 flex items-center">
-                        <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <button className="btn-primary w-full">Enroll Now</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+             </div>
+             
+             {loading ? (
+               <div className="flex items-center justify-center py-12">
+                 <div className="text-center">
+                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-luxury-orange mx-auto mb-4"></div>
+                   <p className="text-gray-600">Loading courses...</p>
+                 </div>
+               </div>
+             ) : error ? (
+               <div className="flex items-center justify-center py-12">
+                 <div className="text-center">
+                   <p className="text-red-600 mb-4">{error}</p>
+                   <button 
+                     onClick={() => window.location.reload()} 
+                     className="btn-primary"
+                   >
+                     Try Again
+                   </button>
+                 </div>
+               </div>
+             ) : (
+               <>
+                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                   {currentCourses.map((course) => (
+                     <div key={course.course_id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                       <div className="h-48 bg-gray-200 relative">
+                         <img 
+                           src={course.thumbnail_url || "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop"} 
+                           alt={course.title}
+                           className="w-full h-full object-cover"
+                         />
+                         <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
+                           {course.level}
+                         </div>
+                         <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                           {course.duration_hours}h
+                         </div>
+                       </div>
+                       <div className="p-6">
+                         <h3 className="text-xl font-bold text-luxury-black mb-2">{course.title}</h3>
+                         <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+                         <div className="flex items-center justify-between mb-4">
+                           <span className="text-2xl font-bold text-luxury-orange">${course.price}</span>
+                           <span className="text-gray-500">{course.duration_hours} hours</span>
+                         </div>
+                         <div className="mb-6">
+                           <div className="flex items-center mb-4">
+                             <div className="w-8 h-8 bg-luxury-orange rounded-full flex items-center justify-center mr-3">
+                               <span className="text-white font-bold text-sm">
+                                 {course.instructor?.name?.charAt(0) || 'I'}
+                               </span>
+                             </div>
+                             <div>
+                               <div className="text-sm font-medium text-luxury-black">
+                                 {course.instructor?.name || 'Instructor'}
+                               </div>
+                               <div className="text-xs text-gray-500">Instructor</div>
+                             </div>
+                           </div>
+                           
+                           {/* Course Features based on level */}
+                           <ul className="space-y-2">
+                             {course.level === 'BEGINNER' && (
+                               <>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Hands-on training
+                                 </li>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Certificate included
+                                 </li>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Lifetime access
+                                 </li>
+                               </>
+                             )}
+                             {course.level === 'INTERMEDIATE' && (
+                               <>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Expert mentorship
+                                 </li>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Advanced techniques
+                                 </li>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Business guidance
+                                 </li>
+                               </>
+                             )}
+                             {course.level === 'ADVANCED' && (
+                               <>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Professional tools
+                                 </li>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Industry certification
+                                 </li>
+                                 <li className="text-sm text-gray-600 flex items-center">
+                                   <div className="w-2 h-2 bg-luxury-orange rounded-full mr-2"></div>
+                                   Mentorship included
+                                 </li>
+                               </>
+                             )}
+                           </ul>
+                         </div>
+                         <button 
+                           onClick={() => handleEnroll(course.course_id)}
+                           className="btn-primary w-full"
+                         >
+                           Enroll Now
+                         </button>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+
+                 {/* Pagination */}
+                 {totalPages > 1 && (
+                   <div className="flex justify-center items-center mt-12">
+                     <div className="flex space-x-2">
+                       <button
+                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                         disabled={currentPage === 1}
+                         className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                           currentPage === 1
+                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                             : 'bg-luxury-orange text-white hover:bg-orange-600'
+                         }`}
+                       >
+                         Previous
+                       </button>
+                       
+                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                         <button
+                           key={page}
+                           onClick={() => setCurrentPage(page)}
+                           className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                             currentPage === page
+                               ? 'bg-luxury-orange text-white'
+                               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                           }`}
+                         >
+                           {page}
+                         </button>
+                       ))}
+                       
+                       <button
+                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                         disabled={currentPage === totalPages}
+                         className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                           currentPage === totalPages
+                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                             : 'bg-luxury-orange text-white hover:bg-orange-600'
+                         }`}
+                       >
+                         Next
+                       </button>
+                     </div>
+                   </div>
+                 )}
+               </>
+             )}
+           </div>
+         </div>
+       </section>
 
       {/* How It Works Section */}
       <section id="how-it-works" className="section-padding bg-gray-50">
