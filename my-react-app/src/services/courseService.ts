@@ -17,9 +17,14 @@ export interface Course {
     name: string;
   };
   instructor?: {
-    user_id: string;
-    name: string;
+    instructor_id: string;
+    first_name: string;
+    last_name: string;
     email: string;
+    bio?: string;
+    specialties: string[];
+    experience_years: number;
+    profile_image_url?: string;
   };
 }
 

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import courseService, { type Course } from '../services/courseService';
+import CoursePurchaseForm from '../components/CoursePurchaseForm';
 
 // Icons
 const ClockIcon = () => (
@@ -17,11 +19,14 @@ const PlayIcon = () => (
 )
 
 const Courses: React.FC = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
   const [courses, setCourses] = useState<Course[]>([]);
   const [newestCourses, setNewestCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   // Fetch courses from backend
   useEffect(() => {
@@ -54,9 +59,21 @@ const Courses: React.FC = () => {
     ? courses 
     : courses.filter(course => course.level.toLowerCase() === activeFilter);
 
-  const handleEnroll = (courseId: string) => {
-    console.log(`Enrolling in course ${courseId}`);
-    // TODO: Implement enrollment functionality
+  const handleEnroll = (course: Course) => {
+    setSelectedCourse(course);
+    setShowPurchaseModal(true);
+  };
+
+  const handlePurchaseSuccess = (purchaseId: string) => {
+    setShowPurchaseModal(false);
+    setSelectedCourse(null);
+    // Navigate to checkout page
+    navigate(`/course-checkout/${purchaseId}`);
+  };
+
+  const handleCloseModal = () => {
+    setShowPurchaseModal(false);
+    setSelectedCourse(null);
   };
 
   // Loading state
@@ -145,7 +162,7 @@ const Courses: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="text-lg font-bold text-luxury-orange">${course.price}</div>
                       <button 
-                        onClick={() => handleEnroll(course.course_id)}
+                        onClick={() => handleEnroll(course)}
                         className="btn-primary text-xs py-1 px-3"
                       >
                         Enroll
@@ -159,31 +176,31 @@ const Courses: React.FC = () => {
         </section>
       )}
 
-             {/* Filter Section */}
-       <section className="bg-white py-8 border-b border-gray-200">
-         <div className="container-custom">
-           <div className="flex flex-wrap justify-center gap-4">
-             {['all', 'beginner', 'intermediate', 'advanced'].map((filter) => (
-               <button
-                 key={filter}
-                 onClick={() => setActiveFilter(filter)}
-                 className={`px-6 py-3 rounded-full font-medium transition-all ${
-                   activeFilter === filter
-                     ? 'bg-luxury-orange text-white'
-                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                 }`}
-               >
-                 {filter.charAt(0).toUpperCase() + filter.slice(1)} Courses
-               </button>
-             ))}
-           </div>
-         </div>
-       </section>
+      {/* Filter Section */}
+      <section className="bg-white py-8 border-b border-gray-200">
+        <div className="container-custom">
+          <div className="flex flex-wrap justify-center gap-4">
+            {['all', 'beginner', 'intermediate', 'advanced'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-6 py-3 rounded-full font-medium transition-all ${
+                  activeFilter === filter
+                    ? 'bg-luxury-orange text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {filter.charAt(0).toUpperCase() + filter.slice(1)} Courses
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
        {/* Filtered Courses Section */}
        {activeFilter !== 'all' && (
-         <section className="section-padding bg-gray-50">
-           <div className="container-custom">
+      <section className="section-padding bg-gray-50">
+        <div className="container-custom">
              <div className="text-center mb-12">
                <h2 className="text-4xl font-bold text-luxury-black mb-4">
                  {activeFilter === 'beginner' ? 'Beginner Courses' :
@@ -197,35 +214,35 @@ const Courses: React.FC = () => {
                </p>
              </div>
              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-               {filteredCourses.map((course) => (
+            {filteredCourses.map((course) => (
                  <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden">
                    <div className="h-40 bg-gray-200 relative">
-                     <img 
+                  <img 
                        src={course.thumbnail_url || "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop"} 
                        alt={course.title}
-                       className="w-full h-full object-cover"
-                     />
-                     <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
-                       {course.level}
-                     </div>
-                     <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {course.level}
+                  </div>
+                  <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
                        {course.duration_hours}h
-                     </div>
-                   </div>
-                   
+                  </div>
+                </div>
+                
                    <div className="p-4">
                      <div className="flex items-center justify-between mb-2">
                        <h3 className="text-lg font-bold text-luxury-black line-clamp-1">{course.title}</h3>
-                       <div className="text-right">
+                    <div className="text-right">
                          <div className="text-xl font-bold text-luxury-orange">${course.price}</div>
-                       </div>
-                     </div>
-                     
+                    </div>
+                  </div>
+                  
                      <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>
-                     
+                  
                      <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-                       <div className="flex items-center">
-                         <ClockIcon />
+                    <div className="flex items-center">
+                      <ClockIcon />
                          <span className="ml-1">{course.duration_hours}h</span>
                        </div>
                      </div>
@@ -234,18 +251,20 @@ const Courses: React.FC = () => {
                        <div className="flex items-center">
                          <div className="w-8 h-8 bg-luxury-orange rounded-full flex items-center justify-center mr-2">
                            <span className="text-white font-bold text-xs">
-                             {course.instructor?.name?.charAt(0) || 'I'}
+                             {course.instructor ? course.instructor.first_name.charAt(0) : 'I'}
                            </span>
                          </div>
                          <div>
                            <div className="text-xs font-medium text-luxury-black">
-                             {course.instructor?.name || 'Instructor'}
+                             {course.instructor ? `${course.instructor.first_name} ${course.instructor.last_name}` : 'Instructor'}
                            </div>
-                           <div className="text-xs text-gray-500">Instructor</div>
+                           <div className="text-xs text-gray-500">
+                             {course.instructor?.experience_years ? `${course.instructor.experience_years} years exp.` : 'Instructor'}
+                           </div>
                          </div>
                        </div>
                        <button 
-                         onClick={() => handleEnroll(course.course_id)}
+                         onClick={() => handleEnroll(course)}
                          className="btn-primary text-sm py-1 px-3"
                        >
                          Enroll
@@ -259,16 +278,16 @@ const Courses: React.FC = () => {
          </section>
        )}
 
-       {/* All Courses by Level Sections (only show when filter is 'all') */}
-       {activeFilter === 'all' && (
-        <section className="section-padding bg-gray-50">
-          <div className="container-custom">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-luxury-black mb-4">Beginner Courses</h2>
-              <p className="text-lg text-gray-600">Perfect for those just starting their detailing journey</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {beginnerCourses.map((course) => (
+               {/* All Courses Section (only show when filter is 'all') */}
+        {activeFilter === 'all' && (
+         <section className="section-padding bg-gray-50">
+           <div className="container-custom">
+             <div className="text-center mb-12">
+               <h2 className="text-4xl font-bold text-luxury-black mb-4">All Courses</h2>
+               <p className="text-lg text-gray-600">Browse all our comprehensive car detailing courses</p>
+             </div>
+             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+               {filteredCourses.map((course) => (
                 <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="h-40 bg-gray-200 relative">
                     <img 
@@ -283,19 +302,19 @@ const Courses: React.FC = () => {
                       {course.duration_hours}h
                     </div>
                   </div>
-                  
+
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-bold text-luxury-black line-clamp-1">{course.title}</h3>
                       <div className="text-right">
                         <div className="text-xl font-bold text-luxury-orange">${course.price}</div>
                       </div>
-                    </div>
-                    
+                  </div>
+
                     <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>
                     
                     <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-                      <div className="flex items-center">
+                    <div className="flex items-center">
                         <ClockIcon />
                         <span className="ml-1">{course.duration_hours}h</span>
                       </div>
@@ -305,206 +324,68 @@ const Courses: React.FC = () => {
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-luxury-orange rounded-full flex items-center justify-center mr-2">
                           <span className="text-white font-bold text-xs">
-                            {course.instructor?.name?.charAt(0) || 'I'}
+                            {course.instructor ? course.instructor.first_name.charAt(0) : 'I'}
                           </span>
                         </div>
-                        <div>
+                      <div>
                           <div className="text-xs font-medium text-luxury-black">
-                            {course.instructor?.name || 'Instructor'}
+                            {course.instructor ? `${course.instructor.first_name} ${course.instructor.last_name}` : 'Instructor'}
                           </div>
-                          <div className="text-xs text-gray-500">Instructor</div>
-                        </div>
+                          <div className="text-xs text-gray-500">
+                            {course.instructor?.experience_years ? `${course.instructor.experience_years} years exp.` : 'Instructor'}
+                          </div>
                       </div>
-                      <button 
-                        onClick={() => handleEnroll(course.course_id)}
-                        className="btn-primary text-sm py-1 px-3"
-                      >
-                        Enroll
-                      </button>
                     </div>
+                    <button 
+                        onClick={() => handleEnroll(course)}
+                        className="btn-primary text-sm py-1 px-3"
+                    >
+                        Enroll
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-                 </section>
-       )}
-
-       {intermediateCourses.length > 0 && activeFilter === 'all' && (
-        <section className="section-padding bg-white">
-          <div className="container-custom">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-luxury-black mb-4">Intermediate Courses</h2>
-              <p className="text-lg text-gray-600">Take your skills to the next level</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {intermediateCourses.map((course) => (
-                <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-                  <div className="h-40 bg-gray-200 relative">
-                    <img 
-                      src={course.thumbnail_url || "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop"} 
-                      alt={course.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {course.level}
-                    </div>
-                    <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                      {course.duration_hours}h
-                    </div>
-                  </div>
-                  
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-luxury-black line-clamp-1">{course.title}</h3>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-luxury-orange">${course.price}</div>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>
-                    
-                    <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-                      <div className="flex items-center">
-                        <ClockIcon />
-                        <span className="ml-1">{course.duration_hours}h</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-luxury-orange rounded-full flex items-center justify-center mr-2">
-                          <span className="text-white font-bold text-xs">
-                            {course.instructor?.name?.charAt(0) || 'I'}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-luxury-black">
-                            {course.instructor?.name || 'Instructor'}
-                          </div>
-                          <div className="text-xs text-gray-500">Instructor</div>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => handleEnroll(course.course_id)}
-                        className="btn-primary text-sm py-1 px-3"
-                      >
-                        Enroll
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-                 </section>
-       )}
-
-       {advancedCourses.length > 0 && activeFilter === 'all' && (
-        <section className="section-padding bg-gray-50">
-          <div className="container-custom">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-luxury-black mb-4">Advanced Courses</h2>
-              <p className="text-lg text-gray-600">Master the most complex detailing techniques</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {advancedCourses.map((course) => (
-                <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="h-40 bg-gray-200 relative">
-                    <img 
-                      src={course.thumbnail_url || "https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop"} 
-                      alt={course.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 right-4 bg-luxury-orange text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {course.level}
-                    </div>
-                    <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                      {course.duration_hours}h
-                    </div>
-                  </div>
-                  
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-luxury-black line-clamp-1">{course.title}</h3>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-luxury-orange">${course.price}</div>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-600 mb-3 text-sm line-clamp-2">{course.description}</p>
-                    
-                    <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-                      <div className="flex items-center">
-                        <ClockIcon />
-                        <span className="ml-1">{course.duration_hours}h</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-luxury-orange rounded-full flex items-center justify-center mr-2">
-                          <span className="text-white font-bold text-xs">
-                            {course.instructor?.name?.charAt(0) || 'I'}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-luxury-black">
-                            {course.instructor?.name || 'Instructor'}
-                          </div>
-                          <div className="text-xs text-gray-500">Instructor</div>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => handleEnroll(course.course_id)}
-                        className="btn-primary text-sm py-1 px-3"
-                      >
-                        Enroll
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
+        )}
 
       {/* Course Preview Section */}
       {courses.length > 0 && (
-        <section className="section-padding bg-white">
-          <div className="container-custom">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-luxury-black mb-4">Course Preview</h2>
-              <p className="text-lg text-gray-600">See what you'll learn in our courses</p>
-            </div>
-            
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-gray-900 rounded-xl overflow-hidden">
-                <div className="aspect-video relative">
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <button className="bg-luxury-orange text-white p-4 rounded-full hover:bg-orange-600 transition-all">
-                      <PlayIcon />
-                    </button>
-                  </div>
-                  <img 
-                    src={courses[0]?.thumbnail_url || "https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&h=450&fit=crop"} 
-                    alt="Course Preview"
-                    className="w-full h-full object-cover"
-                  />
+      <section className="section-padding bg-white">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-luxury-black mb-4">Course Preview</h2>
+            <p className="text-lg text-gray-600">See what you'll learn in our courses</p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-900 rounded-xl overflow-hidden">
+              <div className="aspect-video relative">
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <button className="bg-luxury-orange text-white p-4 rounded-full hover:bg-orange-600 transition-all">
+                    <PlayIcon />
+                  </button>
                 </div>
-                <div className="p-6">
+                <img 
+                    src={courses[0]?.thumbnail_url || "https://images.unsplash.com/photo-1563720223185-11003d516935?w=800&h=450&fit=crop"} 
+                  alt="Course Preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
                   <h3 className="text-xl font-bold text-white mb-2">
                     {courses[0]?.title || 'Course Preview'} - Preview
                   </h3>
                   <p className="text-gray-300">
                     {courses[0]?.description || 'Get a sneak peek at our comprehensive car detailing course'}
                   </p>
-                </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
       )}
 
       {/* Enrollment CTA */}
@@ -521,6 +402,29 @@ const Courses: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Purchase Modal */}
+      {showPurchaseModal && selectedCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Purchase Course</h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+              <CoursePurchaseForm
+                course={selectedCourse}
+                onSuccess={handlePurchaseSuccess}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

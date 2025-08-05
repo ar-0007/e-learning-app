@@ -336,12 +336,12 @@ const Home: React.FC = () => {
                            <div className="flex items-center mb-4">
                              <div className="w-8 h-8 bg-luxury-orange rounded-full flex items-center justify-center mr-3">
                                <span className="text-white font-bold text-sm">
-                                 {course.instructor?.name?.charAt(0) || 'I'}
+                                 {course.instructor ? course.instructor.first_name.charAt(0) : 'I'}
                                </span>
                              </div>
                              <div>
                                <div className="text-sm font-medium text-luxury-black">
-                                 {course.instructor?.name || 'Instructor'}
+                                 {course.instructor ? `${course.instructor.first_name} ${course.instructor.last_name}` : 'Instructor'}
                                </div>
                                <div className="text-xs text-gray-500">Instructor</div>
                              </div>

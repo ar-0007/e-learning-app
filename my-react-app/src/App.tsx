@@ -5,19 +5,24 @@ import Home from './pages/Home';
 import AboutUs from './pages/AboutUs';
 import Courses from './pages/Courses';
 import Mentorship from './pages/Mentorship';
-import Contact from './pages/Contact';
+import Checkout from './pages/Checkout';
+import MentorshipSuccess from './pages/MentorshipSuccess';
+import CourseCheckout from './pages/CourseCheckout';
+import CourseSuccess from './pages/CourseSuccess';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-white">
+      <div className="App">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/mentorship" element={<Mentorship />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/checkout/:bookingId" element={<Checkout />} />
+          <Route path="/course-checkout/:purchaseId" element={<CourseCheckout />} />
+          <Route path="/course-success" element={<CourseSuccess />} />
+          <Route path="/mentorship-success" element={<MentorshipSuccess />} />
         </Routes>
       </div>
     </Router>
