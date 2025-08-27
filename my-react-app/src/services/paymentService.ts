@@ -11,6 +11,8 @@ export interface CoursePaymentIntentData {
   purchaseId: string;
   amount: number;
   currency?: string;
+  membershipSelected?: boolean;
+  membershipType?: string;
 }
 
 export interface PaymentIntentResponse {
@@ -64,17 +66,26 @@ class PaymentService {
   /**
    * Create a payment intent for guest course purchase
    */
-  async createGuestCoursePaymentIntent(purchaseId: string, amount: number): Promise<PaymentIntentResponse> {
+  async createGuestCoursePaymentIntent(
+    purchaseId: string, 
+    amount: number, 
+    membershipData?: { membershipSelected: boolean; membershipType?: string }
+  ): Promise<PaymentIntentResponse> {
     try {
       console.log('PaymentService: Creating course payment intent for purchase:', purchaseId);
       
-      const data: CoursePaymentIntentData = {
+      const data = {
         purchaseId,
         amount,
-        currency: 'usd'
+        currency: 'usd',
+        ...(membershipData && {
+          membershipSelected: membershipData.membershipSelected,
+          membershipType: membershipData.membershipType || '3_MONTH'
+        })
       };
       
-      const response = await api.post(`${this.baseURL}/guest-course-payment-intent`, data);
+      // Use the correct endpoint that handles membership logic
+      const response = await api.post('/guest-course-purchases/create-payment-intent', data);
       console.log('PaymentService: Course payment intent response:', response.data);
       return response.data.data;
     } catch (error: any) {
@@ -97,4 +108,4 @@ class PaymentService {
   }
 }
 
-export default new PaymentService(); 
+export default new PaymentService();

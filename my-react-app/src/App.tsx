@@ -9,6 +9,7 @@ import Checkout from './pages/Checkout';
 import MentorshipSuccess from './pages/MentorshipSuccess';
 import CourseCheckout from './pages/CourseCheckout';
 import CourseSuccess from './pages/CourseSuccess';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/checkout/:bookingId" element={<Checkout />} />
           <Route path="/course-checkout/:purchaseId" element={<CourseCheckout />} />
           <Route path="/course-success" element={<CourseSuccess />} />
+          <Route path="/subscription-success" element={<SubscriptionSuccess />} />
           <Route path="/mentorship-success" element={<MentorshipSuccess />} />
         </Routes>
       </div>

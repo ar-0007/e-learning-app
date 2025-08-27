@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import courseService, { type Course } from '../services/courseService';
@@ -42,12 +43,11 @@ const PlayIcon = () => (
 )
 
 const Home: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('beginner');
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const coursesPerPage = 6;
+  const navigate = useNavigate();
 
   // Fetch courses from backend
   useEffect(() => {
@@ -76,8 +76,7 @@ const Home: React.FC = () => {
   }
 
   const handleEnroll = (courseId: string) => {
-    console.log(`Enrolling in course ${courseId}`);
-    // TODO: Implement enrollment functionality
+    navigate('/courses');
   }
 
   const testimonials = [
@@ -117,16 +116,15 @@ const Home: React.FC = () => {
   // Create array of newest courses (exactly one from each level)
   const newestCourses = [beginnerCourse, intermediateCourse, advancedCourse].filter(Boolean) as Course[];
 
-  // Filter all courses based on active filter for the All Courses section
-  const filteredAllCourses = activeFilter === 'all' 
-    ? courses 
-    : courses.filter(course => course.level.toLowerCase() === activeFilter);
+  // Get 3 courses from each category
+  const beginnerCoursesLimited = beginnerCourses.slice(0, 3);
+  const intermediateCoursesLimited = intermediateCourses.slice(0, 3);
+  const advancedCoursesLimited = advancedCourses.slice(0, 3);
 
-  // Pagination for all courses
-  const indexOfLastCourse = currentPage * coursesPerPage;
-  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
-  const currentCourses = filteredAllCourses.slice(indexOfFirstCourse, indexOfLastCourse);
-  const totalPages = Math.ceil(filteredAllCourses.length / coursesPerPage);
+  // Filter courses based on active filter and limit to 3
+  const currentCourses = activeFilter === 'beginner' ? beginnerCoursesLimited :
+                        activeFilter === 'intermediate' ? intermediateCoursesLimited :
+                        advancedCoursesLimited;
 
   return (
     <div className="min-h-screen bg-white">
@@ -250,14 +248,10 @@ const Home: React.FC = () => {
             <div>
               <div className="text-center mb-12">
                 <h2 className="text-4xl font-bold text-luxury-black mb-4">
-                  {activeFilter === 'all' ? 'All Courses' : 
-                   activeFilter === 'beginner' ? 'Beginner Courses' :
-                   activeFilter === 'intermediate' ? 'Intermediate Courses' :
-                   'Advanced Courses'}
+                  All Courses
                 </h2>
                 <p className="text-lg text-gray-600 mb-8">
-                  {activeFilter === 'all' ? 'Master the art of car detailing with our comprehensive courses' :
-                   activeFilter === 'beginner' ? 'Perfect for those just starting their detailing journey' :
+                  {activeFilter === 'beginner' ? 'Perfect for those just starting their detailing journey' :
                    activeFilter === 'intermediate' ? 'Take your skills to the next level with advanced techniques' :
                    'Professional-level training for experienced detailers'}
                 </p>
@@ -265,7 +259,6 @@ const Home: React.FC = () => {
                                {/* Filter Buttons */}
                 <div className="flex flex-wrap justify-center gap-4 mb-8">
                   {[
-                    { value: 'all', label: 'All Courses' },
                     { value: 'beginner', label: 'Beginner Courses' },
                     { value: 'intermediate', label: 'Intermediate Courses' },
                     { value: 'advanced', label: 'Advanced Courses' }
@@ -274,7 +267,6 @@ const Home: React.FC = () => {
                       key={filter.value}
                       onClick={() => {
                         setActiveFilter(filter.value);
-                        setCurrentPage(1); // Reset to first page when filter changes
                       }}
                       className={`px-6 py-2 rounded-full font-medium transition-all ${
                         activeFilter === filter.value
@@ -410,50 +402,7 @@ const Home: React.FC = () => {
                    ))}
                  </div>
 
-                 {/* Pagination */}
-                 {totalPages > 1 && (
-                   <div className="flex justify-center items-center mt-12">
-                     <div className="flex space-x-2">
-                       <button
-                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                         disabled={currentPage === 1}
-                         className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                           currentPage === 1
-                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                             : 'bg-luxury-orange text-white hover:bg-orange-600'
-                         }`}
-                       >
-                         Previous
-                       </button>
-                       
-                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                         <button
-                           key={page}
-                           onClick={() => setCurrentPage(page)}
-                           className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                             currentPage === page
-                               ? 'bg-luxury-orange text-white'
-                               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                           }`}
-                         >
-                           {page}
-                         </button>
-                       ))}
-                       
-                       <button
-                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                         disabled={currentPage === totalPages}
-                         className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                           currentPage === totalPages
-                             ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                             : 'bg-luxury-orange text-white hover:bg-orange-600'
-                         }`}
-                       >
-                         Next
-                       </button>
-                     </div>
-                   </div>
-                 )}
+
                </>
              )}
            </div>
@@ -558,4 +507,4 @@ const Home: React.FC = () => {
   )
 }
 
-export default Home; 
+export default Home;

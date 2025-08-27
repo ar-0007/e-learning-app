@@ -30,6 +30,12 @@ export interface GuestCoursePurchase {
   };
 }
 
+export interface PaymentStatusUpdate {
+  paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentMethod?: string;
+  transactionId?: string;
+}
+
 export interface CreateGuestCoursePurchaseData {
   courseId: string;
   customerName: string;
@@ -78,16 +84,10 @@ class GuestCoursePurchaseService {
 
   async updatePaymentStatus(
     purchaseId: string, 
-    paymentStatus: string, 
-    paymentMethod?: string, 
-    transactionId?: string
+    statusData: PaymentStatusUpdate
   ): Promise<GuestCoursePurchase> {
     try {
-      const response = await api.put(`${this.baseURL}/${purchaseId}/payment`, {
-        paymentStatus,
-        paymentMethod,
-        transactionId
-      });
+      const response = await api.put(`${this.baseURL}/${purchaseId}/payment`, statusData);
       return response.data.data;
     } catch (error: any) {
       console.error('Error updating payment status:', error);
@@ -106,4 +106,4 @@ class GuestCoursePurchaseService {
   }
 }
 
-export default new GuestCoursePurchaseService(); 
+export default new GuestCoursePurchaseService();
